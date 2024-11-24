@@ -31,6 +31,22 @@ pub mod player {
         }
     }
 
+    pub struct RandomComputerPlayer {
+        pub letter: char,
+    }
+
+    impl RandomComputerPlayer {
+        pub fn new(letter: char) -> Self {
+            Self { letter }
+        }
+    }
+    impl Player for RandomComputerPlayer {
+        fn get_move(&self, game: &Game) -> usize {
+            let available_moves = game.available_moves();
+            available_moves[rand::random::<usize>() % available_moves.len()]
+        }
+    } 
+
     pub struct ComputerPlayer {
         pub letter: char,
     }
