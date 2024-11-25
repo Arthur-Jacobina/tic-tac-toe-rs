@@ -7,7 +7,7 @@ use player::player::{ComputerPlayer, HumanPlayer, RandomComputerPlayer};
 fn main() {
     let mut game = Game::new();
     let x_player = ComputerPlayer::new('X');
-    let o_player = RandomComputerPlayer::new('O');
+    let o_player = HumanPlayer::new('O');
 
     Game::play(&mut game, &x_player, &o_player, true);
 }

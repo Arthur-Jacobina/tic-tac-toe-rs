@@ -50,16 +50,16 @@ pub mod player {
     pub struct ComputerPlayer {
         pub letter: char,
     }
-
+    
     impl ComputerPlayer {
         pub fn new(letter: char) -> Self {
             Self { letter }
         }
-
-        fn minimax(&self, game: &mut Game, player: char) -> (Option<usize>, i32) {
+    
+        fn minimax(&self, game: &mut Game, player: char, mut alpha: i32, mut beta: i32) -> (Option<usize>, i32) {
             let max_player = self.letter;
             let other_player = if player == 'X' { 'O' } else { 'X' };
-
+    
             if let Some(winner) = game.current_winner {
                 if winner == max_player {
                     return (None, 1 * (game.num_empty_squares() as i32 + 1));
@@ -69,42 +69,50 @@ pub mod player {
             } else if !game.empty_squares() {
                 return (None, 0);
             }
-
+    
             let mut best = if player == max_player {
                 (None, i32::MIN)
             } else {
                 (None, i32::MAX)
             };
-
+    
             for &possible_move in &game.available_moves() {
                 game.make_move(possible_move, player);
-                let (_, sim_score) = self.minimax(game, other_player);
-
+                let (_, sim_score) = self.minimax(game, other_player, alpha, beta);
+    
                 game.board[possible_move] = ' ';
                 game.current_winner = None;
-
+    
                 if player == max_player {
                     if sim_score > best.1 {
                         best = (Some(possible_move), sim_score);
                     }
+                    if sim_score > beta {
+                        break;
+                    }
+                    alpha = alpha.max(sim_score);
                 } else {
                     if sim_score < best.1 {
                         best = (Some(possible_move), sim_score);
                     }
+                    if sim_score < alpha {
+                        break;
+                    }
+                    beta = beta.min(sim_score);
                 }
             }
-
+    
             best
         }
     }
-
+    
     impl Player for ComputerPlayer {
         fn get_move(&self, game: &Game) -> usize {
             let mut game_clone = game.clone();
             if game_clone.available_moves().len() == 9 {
                 rand::random::<usize>() % 9
             } else {
-                self.minimax(&mut game_clone, self.letter).0.unwrap()
+                self.minimax(&mut game_clone, self.letter, i32::MIN, i32::MAX).0.unwrap()
             }
         }
     }
